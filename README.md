@@ -55,7 +55,7 @@ are what protect the data. The Firebase SDK only loads when a config is present.
 
 ## Deploy to Vercel
 
-Import the repository, set the project root to `knights-quest/`, add the same
+Import the repository (leave **Root Directory** as `./`), add the same
 `NEXT_PUBLIC_FIREBASE_*` environment variables, and deploy. Add the Vercel domain to the
 authorized domains in Firebase.
 
