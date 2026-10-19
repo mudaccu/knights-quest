@@ -1,0 +1,672 @@
+/* ───────────────────────── The living world ───────────────────────── */
+
+.knight {
+  --kq-walk: 1s;
+}
+
+.world {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: #0b0e14;
+  contain: strict;
+}
+
+.sky-fill {
+  position: absolute;
+  inset: 0;
+  transition: opacity 5s ease-in-out;
+}
+
+.static-layer,
+.strip {
+  position: absolute;
+  pointer-events: none;
+}
+
+.strip {
+  will-change: transform;
+  animation: strip-scroll linear infinite;
+}
+
+.strip > svg,
+.static-layer {
+  overflow: visible;
+}
+
+@keyframes strip-scroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-33.33333%, 0, 0);
+  }
+}
+
+.tint {
+  transition: fill 4.5s ease-in-out, stroke 4.5s ease-in-out, stop-color 4.5s ease-in-out, opacity 4.5s ease-in-out;
+}
+
+.fade-slow,
+.stars,
+.castle-lights {
+  transition: opacity 4.5s ease-in-out;
+}
+
+.celestial {
+  transition: transform 7s cubic-bezier(0.45, 0.05, 0.3, 1), opacity 4s ease-in-out;
+}
+
+/* Stars */
+.twinkle {
+  animation: twinkle 4s ease-in-out infinite;
+}
+.twinkle-1 {
+  animation-duration: 5.5s;
+}
+.twinkle-2 {
+  animation-duration: 3.2s;
+}
+.twinkle-3 {
+  animation-duration: 7s;
+}
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+.shooting-star {
+  opacity: 0;
+  animation: shooting 19s linear infinite;
+  animation-delay: 6s;
+}
+@keyframes shooting {
+  0%,
+  93% {
+    opacity: 0;
+    transform: translate(260px, 60px) rotate(18deg) scaleX(0.2);
+  }
+  94% {
+    opacity: 1;
+  }
+  98% {
+    opacity: 0;
+    transform: translate(760px, 220px) rotate(18deg) scaleX(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(760px, 220px) rotate(18deg) scaleX(1);
+  }
+}
+
+/* Clouds drift across the whole sky */
+.cloud {
+  animation: cloud-drift linear infinite;
+}
+@keyframes cloud-drift {
+  from {
+    transform: translateX(-400px);
+  }
+  to {
+    transform: translateX(2000px);
+  }
+}
+
+/* Castle banner */
+.banner {
+  transform-box: fill-box;
+  transform-origin: left center;
+  animation: banner 2.6s ease-in-out infinite;
+}
+@keyframes banner {
+  0%,
+  100% {
+    transform: scaleX(1) skewY(0deg);
+  }
+  50% {
+    transform: scaleX(0.82) skewY(-6deg);
+  }
+}
+
+.mist--drift {
+  animation: mist-drift 40s ease-in-out infinite alternate;
+}
+@keyframes mist-drift {
+  from {
+    transform: translateX(-80px);
+  }
+  to {
+    transform: translateX(80px);
+  }
+}
+
+/* Foreground grass sways in the wind */
+.sway {
+  animation: sway 4.2s ease-in-out infinite;
+}
+.sway-1 {
+  animation-duration: 5.1s;
+  animation-delay: -1.3s;
+}
+.sway-2 {
+  animation-duration: 3.6s;
+  animation-delay: -2.4s;
+}
+@keyframes sway {
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(5deg);
+  }
+}
+
+/* ───────────── Knight rig ───────────── */
+
+.knight-wrap {
+  position: absolute;
+  pointer-events: none;
+  transition: left 1.6s cubic-bezier(0.45, 0.05, 0.25, 1), top 0.6s ease;
+}
+.knight-wrap .knight {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: var(--kq-grade);
+  transition: filter 4.5s ease-in-out;
+}
+
+.knight .kp {
+  transform-box: view-box;
+  transition: transform 1.8s cubic-bezier(0.45, 0.05, 0.25, 1), opacity 1.6s ease;
+}
+.knight .k-body {
+  transform-origin: 80px 208px;
+}
+.knight .k-lean {
+  transform-origin: 80px 118px;
+}
+.knight .k-thigh {
+  transform-origin: 80px 118px;
+}
+.knight .k-shin {
+  transform-origin: 81px 160px;
+}
+.knight .k-arm {
+  transform-origin: 80px 72px;
+}
+.knight .k-forearm {
+  transform-origin: 80px 98px;
+}
+.knight .k-head {
+  transform-origin: 80px 62px;
+}
+.knight .k-plume {
+  transform-origin: 74px 26px;
+}
+.knight .k-sword {
+  transform-origin: 93px 111px;
+}
+.knight .k-shadow {
+  transform-origin: 84px 209px;
+}
+
+.knight .k-rim {
+  stroke: var(--kq-rim);
+  opacity: var(--kq-rim-o);
+  transition: stroke 4s ease, opacity 4s ease;
+}
+.knight-wrap[data-light="fire"] .k-rim {
+  animation: rim-flicker 1.9s ease-in-out infinite;
+}
+@keyframes rim-flicker {
+  0%,
+  100% {
+    opacity: 0.95;
+  }
+  30% {
+    opacity: 0.65;
+  }
+  55% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 0.75;
+  }
+}
+
+/* Walk cycle */
+.knight[data-pose="walk"] .k-body {
+  animation: k-bob var(--kq-walk) ease-in-out infinite;
+}
+.knight[data-pose="walk"] .k-lean {
+  animation: k-lean var(--kq-walk) ease-in-out infinite;
+}
+.knight[data-pose="walk"] .k-thigh {
+  animation: k-thigh var(--kq-walk) linear infinite;
+}
+.knight[data-pose="walk"] .k-shin {
+  animation: k-shin var(--kq-walk) linear infinite;
+}
+.knight[data-pose="walk"] .k-arm {
+  animation: k-arm var(--kq-walk) ease-in-out infinite;
+}
+.knight[data-pose="walk"] .k-forearm {
+  animation: k-forearm var(--kq-walk) ease-in-out infinite;
+}
+.knight[data-pose="walk"] .k-thigh--back,
+.knight[data-pose="walk"] .k-shin--back,
+.knight[data-pose="walk"] .k-arm--back,
+.knight[data-pose="walk"] .k-forearm--back {
+  animation-delay: calc(var(--kq-walk) / -2);
+}
+.knight[data-pose="walk"] .k-head {
+  animation: k-head var(--kq-walk) ease-in-out infinite;
+}
+.knight[data-pose="walk"] .k-plume {
+  animation: k-plume calc(var(--kq-walk) * 1.6) ease-in-out infinite;
+}
+.knight[data-pose="walk"] .k-sword {
+  animation: k-sword var(--kq-walk) ease-in-out infinite;
+}
+.knight[data-pose="walk"] .k-shadow {
+  animation: k-shadow calc(var(--kq-walk) / 2) ease-in-out infinite;
+}
+.knight[data-pose="walk"] .k-seat,
+.knight[data-pose="walk"] .k-cloak--sit {
+  opacity: 0;
+}
+
+@keyframes k-bob {
+  0%,
+  50%,
+  100% {
+    transform: translateY(4.5px);
+  }
+  25%,
+  75% {
+    transform: translateY(0);
+  }
+}
+@keyframes k-lean {
+  0%,
+  50%,
+  100% {
+    transform: rotate(2.6deg);
+  }
+  25%,
+  75% {
+    transform: rotate(1.6deg);
+  }
+}
+@keyframes k-thigh {
+  0%,
+  100% {
+    transform: rotate(-22deg);
+  }
+  50% {
+    transform: rotate(22deg);
+  }
+}
+@keyframes k-shin {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  12% {
+    transform: rotate(5deg);
+  }
+  46% {
+    transform: rotate(3deg);
+  }
+  56% {
+    transform: rotate(14deg);
+  }
+  70% {
+    transform: rotate(52deg);
+  }
+  86% {
+    transform: rotate(20deg);
+  }
+}
+@keyframes k-arm {
+  0%,
+  100% {
+    transform: rotate(16deg);
+  }
+  50% {
+    transform: rotate(-16deg);
+  }
+}
+@keyframes k-forearm {
+  0%,
+  100% {
+    transform: rotate(-8deg);
+  }
+  50% {
+    transform: rotate(-28deg);
+  }
+}
+@keyframes k-head {
+  0%,
+  50%,
+  100% {
+    transform: rotate(-1.2deg);
+  }
+  25%,
+  75% {
+    transform: rotate(0.8deg);
+  }
+}
+@keyframes k-plume {
+  0%,
+  100% {
+    transform: rotate(-5deg);
+  }
+  50% {
+    transform: rotate(6deg);
+  }
+}
+@keyframes k-sword {
+  0%,
+  100% {
+    transform: rotate(3deg);
+  }
+  50% {
+    transform: rotate(-4deg);
+  }
+}
+@keyframes k-shadow {
+  0%,
+  100% {
+    transform: scaleX(1.06);
+  }
+  50% {
+    transform: scaleX(0.94);
+  }
+}
+
+/* Seated by the fire */
+.knight[data-pose="sit"] .k-cloak--walk,
+.knight[data-pose="sit"] .k-shadow {
+  opacity: 0;
+}
+.knight[data-pose="sit"] .k-body {
+  transform: translateY(31px);
+  animation: k-breathe 5s ease-in-out infinite;
+}
+.knight[data-pose="sit"] .k-lean {
+  transform: rotate(5deg);
+}
+.knight[data-pose="sit"] .k-thigh--front {
+  transform: rotate(-84deg);
+}
+.knight[data-pose="sit"] .k-shin--front {
+  transform: rotate(84deg);
+}
+.knight[data-pose="sit"] .k-thigh--back {
+  transform: rotate(-76deg);
+}
+.knight[data-pose="sit"] .k-shin--back {
+  transform: rotate(80deg);
+}
+.knight[data-pose="sit"] .k-arm--front {
+  transform: rotate(-14deg);
+}
+.knight[data-pose="sit"] .k-forearm--front {
+  transform: rotate(-58deg);
+}
+.knight[data-pose="sit"] .k-arm--back {
+  transform: rotate(-24deg);
+}
+.knight[data-pose="sit"] .k-forearm--back {
+  transform: rotate(-50deg);
+}
+.knight[data-pose="sit"] .k-head {
+  transform: rotate(7deg);
+  animation: k-gaze 9s ease-in-out infinite;
+}
+.knight[data-pose="sit"] .k-plume {
+  animation: k-plume 4s ease-in-out infinite;
+}
+.knight[data-pose="sit"] .k-sword {
+  transform: rotate(22deg);
+}
+@keyframes k-breathe {
+  0%,
+  100% {
+    transform: translateY(31px);
+  }
+  50% {
+    transform: translateY(30.2px);
+  }
+}
+@keyframes k-gaze {
+  0%,
+  100% {
+    transform: rotate(7deg);
+  }
+  45% {
+    transform: rotate(9deg);
+  }
+  70% {
+    transform: rotate(3deg);
+  }
+}
+
+/* ───────────── Campfire ───────────── */
+
+.camp-pos {
+  transition: transform 1.6s cubic-bezier(0.45, 0.05, 0.25, 1);
+}
+.flames {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: flame-sway 2.3s ease-in-out infinite;
+}
+@keyframes flame-sway {
+  0%,
+  100% {
+    transform: scale(1, 1) skewX(0deg);
+  }
+  30% {
+    transform: scale(0.96, 1.06) skewX(-3deg);
+  }
+  60% {
+    transform: scale(1.03, 0.95) skewX(2deg);
+  }
+}
+.fire-flicker {
+  animation: fire-flicker 1.4s ease-in-out infinite;
+}
+@keyframes fire-flicker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  25% {
+    opacity: 0.78;
+  }
+  50% {
+    opacity: 0.95;
+  }
+  70% {
+    opacity: 0.7;
+  }
+}
+.ember {
+  fill: #ffb45e;
+  animation: ember-rise 3s ease-out infinite;
+}
+@keyframes ember-rise {
+  0% {
+    transform: translate(0, 0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--dx), var(--rise));
+    opacity: 0;
+  }
+}
+
+.firelight {
+  position: absolute;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  mix-blend-mode: screen;
+  transition: opacity 3s ease-in-out, left 1.6s cubic-bezier(0.45, 0.05, 0.25, 1);
+}
+.firelight__glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(255, 150, 70, 0.32) 0%, rgba(255, 120, 50, 0.12) 30%, rgba(255, 110, 40, 0) 62%);
+  animation: fire-flicker 1.8s ease-in-out infinite;
+}
+
+/* ───────────── Particles ───────────── */
+
+.firefly {
+  animation: ff-a 8s ease-in-out infinite;
+}
+.firefly-1 {
+  animation-name: ff-b;
+  animation-duration: 10s;
+}
+.firefly-2 {
+  animation-name: ff-c;
+  animation-duration: 7s;
+}
+@keyframes ff-a {
+  0%,
+  100% {
+    transform: translate(0, 0);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  50% {
+    transform: translate(30px, -26px);
+    opacity: 0.3;
+  }
+  75% {
+    opacity: 0.9;
+  }
+}
+@keyframes ff-b {
+  0%,
+  100% {
+    transform: translate(0, 0);
+    opacity: 0.2;
+  }
+  35% {
+    transform: translate(-36px, -14px);
+    opacity: 1;
+  }
+  70% {
+    transform: translate(-10px, -40px);
+    opacity: 0;
+  }
+}
+@keyframes ff-c {
+  0%,
+  100% {
+    transform: translate(0, 0);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translate(18px, 20px);
+    opacity: 0;
+  }
+}
+
+.leaf {
+  animation: leaf-fall linear infinite;
+}
+.leaf-spin {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: leaf-spin ease-in-out infinite alternate;
+}
+@keyframes leaf-fall {
+  0% {
+    transform: translate(var(--x0), -40px);
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.9;
+  }
+  50% {
+    transform: translate(calc(var(--x0) - 360px), 420px);
+  }
+  92% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(calc(var(--x0) - 760px), 900px);
+    opacity: 0;
+  }
+}
+@keyframes leaf-spin {
+  from {
+    transform: rotate(-60deg) scaleY(1);
+  }
+  to {
+    transform: rotate(120deg) scaleY(0.4);
+  }
+}
+
+.grade,
+.vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: opacity 5s ease-in-out;
+}
+.grade {
+  background: radial-gradient(ellipse at 74% 62%, rgba(255, 170, 90, 0.35), rgba(255, 140, 80, 0.12) 45%, rgba(120, 60, 90, 0.18) 100%);
+  mix-blend-mode: soft-light;
+}
+.vignette {
+  background: radial-gradient(ellipse 120% 90% at 50% 58%, transparent 55%, rgba(5, 6, 10, 0.55) 100%);
+}
+
+/* ───────────── Reduced motion ───────────── */
+
+.reduce-motion .world .strip,
+.reduce-motion .world .cloud,
+.reduce-motion .world .sway,
+.reduce-motion .world .mist--drift {
+  animation-play-state: paused !important;
+}
+.reduce-motion .world .knight *,
+.reduce-motion .world .ember,
+.reduce-motion .world .leaf,
+.reduce-motion .world .shooting-star,
+.reduce-motion .world .firefly {
+  animation: none !important;
+}
+.reduce-motion .world .leaf,
+.reduce-motion .world .shooting-star {
+  opacity: 0 !important;
+}
+
+/* Fine film grain over the whole scene, for the warmth of an old print */
+.world::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .45 0 0 0 0 .38 0 0 0 .6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  opacity: 0.09;
+  mix-blend-mode: overlay;
+}

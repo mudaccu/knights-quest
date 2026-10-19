@@ -1,0 +1,95 @@
+rules_version = '2';
+
+// Every document lives under /users/{uid}. A signed-in user can only read or
+// write their own tree, and every write is shape- and size-checked.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    function str(v, max) {
+      return v is string && v.size() <= max;
+    }
+
+    function optTimestamp(v) {
+      return v == null || (v is string && v.size() <= 40);
+    }
+
+    function validProfile(d) {
+      return d.keys().hasOnly(['displayName', 'onboarded', 'totalXp', 'days', 'createdAt'])
+        && (!('displayName' in d) || str(d.displayName, 40))
+        && (!('onboarded' in d) || d.onboarded is bool)
+        && (!('totalXp' in d) || (d.totalXp is number && d.totalXp >= 0))
+        && (!('days' in d) || (d.days is map && d.days.size() <= 4000))
+        && (!('createdAt' in d) || str(d.createdAt, 40));
+    }
+
+    function validQuest(d, id) {
+      return d.keys().hasOnly(['id', 'title', 'epithet', 'description', 'category', 'customCategory', 'dueDate', 'dueTime',
+                               'priority', 'reminderAt', 'reminderFired', 'repeat', 'completed', 'completedAt', 'xpAwarded',
+                               'createdAt', 'updatedAt'])
+        && d.id == id
+        && str(d.title, 140) && d.title.size() > 0
+        && str(d.epithet, 80)
+        && str(d.description, 2000)
+        && d.category in ['study', 'work', 'health', 'personal', 'custom']
+        && str(d.customCategory, 30)
+        && d.dueDate is string && d.dueDate.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && d.dueTime is string && (d.dueTime == '' || d.dueTime.matches('^[0-9]{2}:[0-9]{2}$'))
+        && d.priority in ['low', 'normal', 'high']
+        && optTimestamp(d.reminderAt)
+        && d.reminderFired is bool
+        && d.repeat in ['none', 'daily', 'weekdays', 'weekly', 'monthly']
+        && d.completed is bool
+        && optTimestamp(d.completedAt)
+        && d.xpAwarded is number && d.xpAwarded >= 0 && d.xpAwarded <= 100
+        && str(d.createdAt, 40) && str(d.updatedAt, 40);
+    }
+
+    function validNote(d, id) {
+      return d.keys().hasOnly(['id', 'title', 'content', 'tag', 'pinned', 'important', 'reminderAt', 'reminderFired',
+                               'createdAt', 'updatedAt'])
+        && d.id == id
+        && str(d.title, 140) && d.title.size() > 0
+        && str(d.content, 5000)
+        && str(d.tag, 30)
+        && d.pinned is bool && d.important is bool
+        && optTimestamp(d.reminderAt)
+        && d.reminderFired is bool
+        && str(d.createdAt, 40) && str(d.updatedAt, 40);
+    }
+
+    function validReflection(d, id) {
+      return d.keys().hasOnly(['date', 'accomplished', 'wentWell', 'improve', 'updatedAt'])
+        && d.date == id
+        && str(d.accomplished, 3000) && str(d.wentWell, 3000) && str(d.improve, 3000)
+        && str(d.updatedAt, 40);
+    }
+
+    match /users/{uid} {
+      allow read: if isOwner(uid);
+      allow create, update: if isOwner(uid) && validProfile(request.resource.data);
+      allow delete: if false;
+
+      match /quests/{id} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && validQuest(request.resource.data, id);
+      }
+      match /notes/{id} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && validNote(request.resource.data, id);
+      }
+      match /reflections/{id} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && validReflection(request.resource.data, id);
+      }
+    }
+
+    // Everything else is closed.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
